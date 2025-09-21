@@ -78,3 +78,37 @@ When implementing tests:
 - Test authentication flows
 - Test error handling scenarios
 - Consider integration tests with actual API (using test credentials)
+
+## Lessons Learned
+
+### Milestone 1: Project Foundation & Core Infrastructure
+
+**Standard Library First Approach:**
+- Prefer Go standard library over external dependencies when possible
+- `errors` package with Go 1.13+ wrapping is sufficient for typed errors
+- Standard `log` package can be extended for structured logging
+- Reduces dependency bloat and improves maintainability
+
+**Configuration Management:**
+- Multi-source configuration (files → .env → env vars) provides excellent flexibility
+- Validation at load time prevents runtime configuration errors
+- Default values ensure the application can run with minimal setup
+- Sensitive data should always come from environment variables, never committed files
+
+**Development Workflow:**
+- Atomic commits with conventional commit messages improve project history
+- Feature branches with descriptive names aid in tracking work
+- Comprehensive PR descriptions with test plans improve code review quality
+- Documentation updates should be committed separately from code changes
+
+**Project Structure:**
+- Follow Go project layout standards: `cmd/`, `pkg/`, `internal/`
+- Internal packages prevent accidental imports and provide clear boundaries
+- Comprehensive `.gitignore` prevents accidental commits of sensitive data
+- Clear separation of concerns between config, logging, and error handling
+
+**Testing Strategy:**
+- Unit tests for each package verify functionality in isolation
+- Test error paths as thoroughly as happy paths
+- Verbose test output (`go test -v`) helps verify test coverage
+- Build verification (`go build ./...`) ensures all packages compile correctly
