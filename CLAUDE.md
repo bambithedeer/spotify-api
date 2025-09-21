@@ -145,3 +145,5 @@ When implementing tests:
 - Dependency injection would improve testability for future enhancements
 - Consistent error types across packages improve error handling
 - Token management should be transparent to API endpoint implementations
+- Remember the best way to query issues and milestones. Ideally this would be via gh cli but other methods are sufficient
+- remember to follow the development cycle closely
