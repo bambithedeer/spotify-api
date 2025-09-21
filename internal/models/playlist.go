@@ -53,3 +53,8 @@ type CategoryPlaylists struct {
 type PlaylistSnapshot struct {
 	SnapshotID string `json:"snapshot_id"`
 }
+
+// SnapshotResponse represents the response when modifying a playlist
+type SnapshotResponse struct {
+	SnapshotID string `json:"snapshot_id"`
+}

@@ -105,6 +105,11 @@ func (c *Client) Delete(ctx context.Context, endpoint string) (*http.Response, e
 	return c.makeRequest(ctx, "DELETE", endpoint, nil)
 }
 
+// DeleteWithBody performs a DELETE request with body to the Spotify API
+func (c *Client) DeleteWithBody(ctx context.Context, endpoint string, body io.Reader) (*http.Response, error) {
+	return c.makeRequest(ctx, "DELETE", endpoint, body)
+}
+
 // makeRequest is the internal method that handles all HTTP requests with rate limiting and retries
 func (c *Client) makeRequest(ctx context.Context, method, endpoint string, body io.Reader) (*http.Response, error) {
 	// Ensure we have a valid token
