@@ -254,3 +254,8 @@ func (c *Client) SetRetryConfig(config *ratelimit.RetryConfig) {
 func (c *Client) GetRateLimiterStatus() (availableTokens int, maxTokens int, retryAfter time.Time) {
 	return c.rateLimiter.GetStatus()
 }
+
+// SetBaseURL sets the base URL for the client (useful for testing)
+func (c *Client) SetBaseURL(baseURL string) {
+	c.baseURL = baseURL
+}
