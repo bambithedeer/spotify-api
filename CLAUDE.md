@@ -112,3 +112,36 @@ When implementing tests:
 - Test error paths as thoroughly as happy paths
 - Verbose test output (`go test -v`) helps verify test coverage
 - Build verification (`go build ./...`) ensures all packages compile correctly
+
+### Milestone 2: Authentication & Authorization
+
+**OAuth 2.0 Implementation:**
+- Research API documentation thoroughly before implementation - initial assumption about simple API keys was incorrect
+- Spotify requires proper OAuth 2.0 flows (Client Credentials + Authorization Code)
+- Client Credentials flow is perfect for CLI tools accessing public data
+- Authorization Code flow enables user-specific data access (playlists, library)
+- Always implement token refresh mechanism for long-running applications
+
+**HTTP Client Design:**
+- Automatic token management reduces complexity for API consumers
+- Context-aware requests provide proper cancellation and timeout handling
+- Centralized error handling with typed errors improves debugging
+- Pre-flight token validation prevents unnecessary API calls
+
+**Security Considerations:**
+- Base64 encoding of client credentials follows OAuth 2.0 standards
+- Token expiration checks prevent API failures
+- Error messages should not leak sensitive credential information
+- Proper timeout handling prevents hanging requests
+
+**Testing OAuth Flows:**
+- Unit tests should focus on logic, not external API calls
+- Integration tests require real credentials and should be optional
+- Mock servers are useful for testing HTTP request structure
+- Skip tests that require external dependencies rather than failing
+
+**API Client Architecture:**
+- Separation of concerns: auth package handles OAuth, client package handles HTTP
+- Dependency injection would improve testability for future enhancements
+- Consistent error types across packages improve error handling
+- Token management should be transparent to API endpoint implementations
