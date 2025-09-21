@@ -72,3 +72,8 @@ type Queue struct {
 	CurrentlyPlaying interface{}   `json:"currently_playing"` // Can be Track or Episode
 	Queue            []interface{} `json:"queue"`              // Can be Track or Episode
 }
+
+// DevicesResponse represents the response from the devices endpoint
+type DevicesResponse struct {
+	Devices []Device `json:"devices"`
+}

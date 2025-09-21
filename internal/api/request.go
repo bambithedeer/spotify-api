@@ -166,6 +166,26 @@ func (rb *RequestBuilder) Delete(ctx context.Context, endpoint string, params Qu
 	return rb.responseHandler.ParseResponse(resp, nil)
 }
 
+// DeleteWithBody performs a DELETE request with JSON body
+func (rb *RequestBuilder) DeleteWithBody(ctx context.Context, endpoint string, body interface{}, result interface{}) error {
+	var bodyReader io.Reader
+
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return errors.WrapValidationError(err, "failed to marshal request body")
+		}
+		bodyReader = strings.NewReader(string(jsonBody))
+	}
+
+	resp, err := rb.client.DeleteWithBody(ctx, endpoint, bodyReader)
+	if err != nil {
+		return err
+	}
+
+	return rb.responseHandler.ParseResponse(resp, result)
+}
+
 // buildURL builds the complete URL with query parameters
 func (rb *RequestBuilder) buildURL(endpoint string, params QueryParams) string {
 	if params == nil || len(params) == 0 {
