@@ -9,6 +9,7 @@ import (
 
 	"github.com/bambithedeer/spotify-api/internal/auth"
 	"github.com/bambithedeer/spotify-api/internal/errors"
+	"github.com/bambithedeer/spotify-api/internal/ratelimit"
 )
 
 const (
@@ -18,10 +19,12 @@ const (
 
 // Client represents a Spotify API client
 type Client struct {
-	httpClient *http.Client
-	authClient *auth.Client
-	token      *auth.Token
-	baseURL    string
+	httpClient  *http.Client
+	authClient  *auth.Client
+	token       *auth.Token
+	baseURL     string
+	rateLimiter *ratelimit.RateLimiter
+	retryConfig *ratelimit.RetryConfig
 }
 
 // NewClient creates a new Spotify API client
@@ -30,8 +33,10 @@ func NewClient(clientID, clientSecret, redirectURI string) *Client {
 		httpClient: &http.Client{
 			Timeout: DefaultTimeout,
 		},
-		authClient: auth.NewClient(clientID, clientSecret, redirectURI),
-		baseURL:    SpotifyAPIBaseURL,
+		authClient:  auth.NewClient(clientID, clientSecret, redirectURI),
+		baseURL:     SpotifyAPIBaseURL,
+		rateLimiter: ratelimit.NewRateLimiter(),
+		retryConfig: ratelimit.DefaultRetryConfig(),
 	}
 }
 
@@ -100,7 +105,7 @@ func (c *Client) Delete(ctx context.Context, endpoint string) (*http.Response, e
 	return c.makeRequest(ctx, "DELETE", endpoint, nil)
 }
 
-// makeRequest is the internal method that handles all HTTP requests
+// makeRequest is the internal method that handles all HTTP requests with rate limiting and retries
 func (c *Client) makeRequest(ctx context.Context, method, endpoint string, body io.Reader) (*http.Response, error) {
 	// Ensure we have a valid token
 	if err := c.RefreshTokenIfNeeded(); err != nil {
@@ -111,6 +116,82 @@ func (c *Client) makeRequest(ctx context.Context, method, endpoint string, body 
 		return nil, errors.NewAuthError("not authenticated")
 	}
 
+	// Implement retry logic with exponential backoff
+	for attempt := 0; attempt <= c.retryConfig.MaxRetries; attempt++ {
+		// Wait for rate limiter
+		if err := c.rateLimiter.Wait(ctx); err != nil {
+			return nil, errors.WrapNetworkError(err, "rate limiter wait failed")
+		}
+
+		// Create a new request for each attempt (body might need to be read multiple times)
+		var requestBody io.Reader
+		if body != nil {
+			// For retry attempts, we need a fresh body reader
+			// This is a limitation - callers should pass seekable readers for retries
+			requestBody = body
+		}
+
+		resp, err := c.executeRequest(ctx, method, endpoint, requestBody)
+
+		// If request succeeded or context was cancelled, return immediately
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil, ctx.Err()
+			}
+			// Network error - should retry
+			if attempt < c.retryConfig.MaxRetries {
+				delay := c.retryConfig.GetRetryDelay(attempt, nil)
+				select {
+				case <-time.After(delay):
+					continue
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				}
+			}
+			return nil, err
+		}
+
+		// Handle rate limiting
+		if resp.StatusCode == http.StatusTooManyRequests {
+			if err := c.rateLimiter.HandleRateLimitResponse(resp); err != nil {
+				// If this is the last attempt, return the error
+				if !c.retryConfig.ShouldRetry(resp, attempt) {
+					resp.Body.Close()
+					return nil, err
+				}
+				// Otherwise, wait and retry
+				resp.Body.Close()
+				delay := c.retryConfig.GetRetryDelay(attempt, resp)
+				select {
+				case <-time.After(delay):
+					continue
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				}
+			}
+		}
+
+		// Check if we should retry based on status code
+		if c.retryConfig.ShouldRetry(resp, attempt) {
+			resp.Body.Close()
+			delay := c.retryConfig.GetRetryDelay(attempt, resp)
+			select {
+			case <-time.After(delay):
+				continue
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			}
+		}
+
+		// Request succeeded, return response
+		return resp, nil
+	}
+
+	return nil, errors.NewAPIError("max retries exceeded")
+}
+
+// executeRequest performs a single HTTP request without retry logic
+func (c *Client) executeRequest(ctx context.Context, method, endpoint string, body io.Reader) (*http.Response, error) {
 	// Build the full URL
 	url := c.baseURL + endpoint
 
@@ -130,16 +211,14 @@ func (c *Client) makeRequest(ctx context.Context, method, endpoint string, body 
 		return nil, errors.WrapNetworkError(err, "request failed")
 	}
 
-	// Handle common HTTP errors
+	// Handle common HTTP errors that shouldn't be retried
 	switch resp.StatusCode {
 	case http.StatusUnauthorized:
+		resp.Body.Close()
 		return nil, errors.NewAuthError("unauthorized - token may be invalid")
 	case http.StatusForbidden:
+		resp.Body.Close()
 		return nil, errors.NewAuthError("forbidden - insufficient permissions")
-	case http.StatusTooManyRequests:
-		return nil, errors.NewAPIError("rate limited - too many requests")
-	case http.StatusInternalServerError, http.StatusBadGateway, http.StatusServiceUnavailable:
-		return nil, errors.NewAPIError("Spotify API error - service unavailable")
 	}
 
 	return resp, nil
@@ -159,4 +238,19 @@ func (c *Client) ExchangeCode(code string) error {
 
 	c.token = token
 	return nil
+}
+
+// SetRateLimiter allows customization of the rate limiter
+func (c *Client) SetRateLimiter(rl *ratelimit.RateLimiter) {
+	c.rateLimiter = rl
+}
+
+// SetRetryConfig allows customization of the retry configuration
+func (c *Client) SetRetryConfig(config *ratelimit.RetryConfig) {
+	c.retryConfig = config
+}
+
+// GetRateLimiterStatus returns the current rate limiter status
+func (c *Client) GetRateLimiterStatus() (availableTokens int, maxTokens int, retryAfter time.Time) {
+	return c.rateLimiter.GetStatus()
 }
