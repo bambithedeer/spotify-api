@@ -62,3 +62,4 @@ coverage.html
 
 # Development files
 CLAUDE.md
+.env
