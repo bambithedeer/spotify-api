@@ -9,7 +9,7 @@ import (
 func TestConfig_Default(t *testing.T) {
 	config := Default()
 
-	if config.RedirectURI != "http://localhost:8080/callback" {
+	if config.RedirectURI != "http://127.0.0.1:4000" {
 		t.Errorf("Expected default redirect URI, got %s", config.RedirectURI)
 	}
 
@@ -160,7 +160,7 @@ func TestConfig_SaveAndLoad(t *testing.T) {
 	}
 
 	// Set some test data
-	SetCredentials("test_client_id", "test_client_secret", "http://localhost:8080/callback")
+	SetCredentials("test_client_id", "test_client_secret", "http://127.0.0.1:4000")
 	SetTokens("test_access_token", "test_refresh_token", "Bearer", "2023-12-31T23:59:59Z")
 
 	// Save config
