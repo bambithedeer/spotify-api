@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/bambithedeer/spotify-api/internal/cli/config"
+	"github.com/bambithedeer/spotify-api/internal/cli/utils"
 	"github.com/bambithedeer/spotify-api/internal/version"
 )
 
@@ -96,15 +97,30 @@ func newVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Print version information",
 		Long:  "Print the version, build time, and git commit of spotify-cli",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("spotify-cli %s\n", version.Get().String())
-			if verbose {
-				fmt.Printf("Version: %s\n", version.Get().Version)
-				fmt.Printf("Git Commit: %s\n", version.Get().GitCommit)
-				fmt.Printf("Build Time: %s\n", version.Get().BuildTime)
-				fmt.Printf("Go Version: %s\n", version.Get().GoVersion)
-				fmt.Printf("Platform: %s\n", version.Get().Platform)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			versionInfo := version.Get()
+			cfg := config.Get()
+
+			// Check if we should output structured data
+			if cfg.DefaultOutput == "json" || cfg.DefaultOutput == "yaml" {
+				return utils.Output(versionInfo)
 			}
+
+			// Text output
+			if cfg.Verbose || verbose {
+				// Verbose output - show all details
+				fmt.Printf("spotify-cli %s\n", versionInfo.String())
+				fmt.Printf("Version: %s\n", versionInfo.Version)
+				fmt.Printf("Git Commit: %s\n", versionInfo.GitCommit)
+				fmt.Printf("Build Time: %s\n", versionInfo.BuildTime)
+				fmt.Printf("Go Version: %s\n", versionInfo.GoVersion)
+				fmt.Printf("Platform: %s\n", versionInfo.Platform)
+			} else {
+				// Simple output - just version string
+				fmt.Printf("spotify-cli %s\n", versionInfo.String())
+			}
+
+			return nil
 		},
 	}
 }
