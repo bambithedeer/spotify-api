@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 )
 
@@ -40,14 +42,30 @@ var (
 
 // Default returns a default configuration
 func Default() *Config {
-	return &Config{
-		RedirectURI:   "http://localhost:8080/callback",
+	// Try to load .env file (ignore errors if it doesn't exist)
+	godotenv.Load()
+
+	config := &Config{
+		RedirectURI:   "http://127.0.0.1:4000",
 		DefaultOutput: "text",
 		Verbose:       false,
 		ColorOutput:   true,
 		CacheEnabled:  true,
 		CacheTTL:      "1h",
 	}
+
+	// Override with environment variables if present
+	if clientID := os.Getenv("SPOTIFY_CLIENT_ID"); clientID != "" {
+		config.ClientID = clientID
+	}
+	if clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET"); clientSecret != "" {
+		config.ClientSecret = clientSecret
+	}
+	if redirectURI := os.Getenv("SPOTIFY_REDIRECT_URI"); redirectURI != "" {
+		config.RedirectURI = redirectURI
+	}
+
+	return config
 }
 
 // Init initializes the configuration system
@@ -138,10 +156,30 @@ func ClearTokens() {
 	config.ExpiresAt = ""
 }
 
-// IsAuthenticated returns true if the user is authenticated
+// IsAuthenticated returns true if the user is authenticated with a valid token
 func IsAuthenticated() bool {
 	config := Get()
-	return config.AccessToken != "" && config.RefreshToken != ""
+
+	// Check if access token exists
+	if config.AccessToken == "" {
+		return false
+	}
+
+	// Check if token is expired
+	if config.ExpiresAt != "" {
+		expiresAt, err := time.Parse(time.RFC3339, config.ExpiresAt)
+		if err != nil {
+			// Invalid expiry format, consider token invalid
+			return false
+		}
+
+		// Token is expired if current time is after expiry time
+		if time.Now().After(expiresAt) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // HasCredentials returns true if API credentials are configured
@@ -175,4 +213,41 @@ func load() (*Config, error) {
 // GetConfigFile returns the path to the config file
 func GetConfigFile() string {
 	return configFile
+}
+
+// IsTokenExpired returns true if the current token is expired
+func IsTokenExpired() bool {
+	config := Get()
+
+	if config.ExpiresAt == "" {
+		return false // No expiry info, assume valid
+	}
+
+	expiresAt, err := time.Parse(time.RFC3339, config.ExpiresAt)
+	if err != nil {
+		return true // Invalid format, consider expired
+	}
+
+	return time.Now().After(expiresAt)
+}
+
+// IsTokenExpiringSoon returns true if token expires within the next 5 minutes
+func IsTokenExpiringSoon() bool {
+	config := Get()
+
+	if config.ExpiresAt == "" {
+		return false // No expiry info
+	}
+
+	expiresAt, err := time.Parse(time.RFC3339, config.ExpiresAt)
+	if err != nil {
+		return true // Invalid format
+	}
+
+	return time.Now().Add(5 * time.Minute).After(expiresAt)
+}
+
+// Reset clears the current configuration (useful for testing)
+func Reset() {
+	current = nil
 }
