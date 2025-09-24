@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -35,7 +36,7 @@ Examples:
   spotify-cli player play
   spotify-cli --help`,
 	SilenceUsage:  true,
-	SilenceErrors: true,
+	SilenceErrors: false,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return initConfig()
 	},
@@ -45,6 +46,11 @@ Examples:
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() error {
 	return rootCmd.Execute()
+}
+
+// GetCommandContext returns a context for command execution
+func GetCommandContext() context.Context {
+	return context.Background()
 }
 
 func init() {
