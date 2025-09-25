@@ -58,11 +58,9 @@ func (s *LibraryService) SaveTracks(ctx context.Context, trackIDs []string) erro
 		return err
 	}
 
-	params := api.QueryParams{
-		"ids": strings.Join(normalizedIDs, ","),
-	}
-
-	err = s.client.Put(ctx, "/me/tracks", params, nil)
+	// Build URL with query parameters for PUT request
+	endpoint := "/me/tracks?ids=" + strings.Join(normalizedIDs, ",")
+	err = s.client.Put(ctx, endpoint, nil, nil)
 	if err != nil {
 		return errors.WrapAPIError(err, "failed to save tracks")
 	}
@@ -86,11 +84,9 @@ func (s *LibraryService) RemoveTracks(ctx context.Context, trackIDs []string) er
 		return err
 	}
 
-	params := api.QueryParams{
-		"ids": strings.Join(normalizedIDs, ","),
-	}
-
-	err = s.client.Delete(ctx, "/me/tracks", params)
+	// Build URL with query parameters for DELETE request
+	endpoint := "/me/tracks?ids=" + strings.Join(normalizedIDs, ",")
+	err = s.client.Delete(ctx, endpoint, nil)
 	if err != nil {
 		return errors.WrapAPIError(err, "failed to remove tracks")
 	}
@@ -178,11 +174,9 @@ func (s *LibraryService) SaveAlbums(ctx context.Context, albumIDs []string) erro
 		return err
 	}
 
-	params := api.QueryParams{
-		"ids": strings.Join(normalizedIDs, ","),
-	}
-
-	err = s.client.Put(ctx, "/me/albums", params, nil)
+	// Build URL with query parameters for PUT request
+	endpoint := "/me/albums?ids=" + strings.Join(normalizedIDs, ",")
+	err = s.client.Put(ctx, endpoint, nil, nil)
 	if err != nil {
 		return errors.WrapAPIError(err, "failed to save albums")
 	}
@@ -206,11 +200,9 @@ func (s *LibraryService) RemoveAlbums(ctx context.Context, albumIDs []string) er
 		return err
 	}
 
-	params := api.QueryParams{
-		"ids": strings.Join(normalizedIDs, ","),
-	}
-
-	err = s.client.Delete(ctx, "/me/albums", params)
+	// Build URL with query parameters for DELETE request
+	endpoint := "/me/albums?ids=" + strings.Join(normalizedIDs, ",")
+	err = s.client.Delete(ctx, endpoint, nil)
 	if err != nil {
 		return errors.WrapAPIError(err, "failed to remove albums")
 	}

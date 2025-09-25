@@ -40,6 +40,11 @@ func (rh *ResponseHandler) ParseResponse(resp *http.Response, v interface{}) err
 		return nil
 	}
 
+	// If v is nil, don't attempt to unmarshal (for endpoints that don't return data)
+	if v == nil {
+		return nil
+	}
+
 	if err := json.Unmarshal(body, v); err != nil {
 		return errors.WrapAPIError(err, fmt.Sprintf("failed to unmarshal response: %s", string(body)))
 	}

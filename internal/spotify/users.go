@@ -80,6 +80,7 @@ func (s *UsersService) GetFollowedArtists(ctx context.Context, options *Followed
 	return &response.Artists, nil
 }
 
+
 // FollowArtists follows one or more artists
 func (s *UsersService) FollowArtists(ctx context.Context, artistIDs []string) error {
 	if len(artistIDs) == 0 {
@@ -245,6 +246,7 @@ type FollowedArtistsOptions struct {
 	Limit int    `json:"limit,omitempty"`
 	After string `json:"after,omitempty"`
 }
+
 
 // TopItemsOptions contains options for getting top artists and tracks
 type TopItemsOptions struct {
