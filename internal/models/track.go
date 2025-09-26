@@ -2,26 +2,26 @@ package models
 
 // Track represents a Spotify track
 type Track struct {
-	Album            *SimpleAlbum     `json:"album,omitempty"`
-	Artists          []SimpleArtist   `json:"artists"`
-	AvailableMarkets []string         `json:"available_markets"`
-	DiscNumber       int              `json:"disc_number"`
-	DurationMs       int              `json:"duration_ms"`
-	Explicit         bool             `json:"explicit"`
-	ExternalIDs      ExternalIDs      `json:"external_ids"`
-	ExternalURLs     ExternalURLs     `json:"external_urls"`
-	Href             string           `json:"href"`
-	ID               string           `json:"id"`
-	IsPlayable       bool             `json:"is_playable,omitempty"`
-	LinkedFrom       *TrackLink       `json:"linked_from,omitempty"`
-	Restrictions     *Restrictions    `json:"restrictions,omitempty"`
-	Name             string           `json:"name"`
-	Popularity       int              `json:"popularity"`
-	PreviewURL       string           `json:"preview_url"`
-	TrackNumber      int              `json:"track_number"`
-	Type             string           `json:"type"`
-	URI              string           `json:"uri"`
-	IsLocal          bool             `json:"is_local"`
+	Album            *SimpleAlbum   `json:"album,omitempty"`
+	Artists          []SimpleArtist `json:"artists"`
+	AvailableMarkets []string       `json:"available_markets"`
+	DiscNumber       int            `json:"disc_number"`
+	DurationMs       int            `json:"duration_ms"`
+	Explicit         bool           `json:"explicit"`
+	ExternalIDs      ExternalIDs    `json:"external_ids"`
+	ExternalURLs     ExternalURLs   `json:"external_urls"`
+	Href             string         `json:"href"`
+	ID               string         `json:"id"`
+	IsPlayable       bool           `json:"is_playable,omitempty"`
+	LinkedFrom       *TrackLink     `json:"linked_from,omitempty"`
+	Restrictions     *Restrictions  `json:"restrictions,omitempty"`
+	Name             string         `json:"name"`
+	Popularity       int            `json:"popularity"`
+	PreviewURL       string         `json:"preview_url"`
+	TrackNumber      int            `json:"track_number"`
+	Type             string         `json:"type"`
+	URI              string         `json:"uri"`
+	IsLocal          bool           `json:"is_local"`
 }
 
 // SimpleTrack represents a simplified track object
@@ -62,10 +62,10 @@ type SavedTrack struct {
 
 // PlaylistTrack represents a track in a playlist
 type PlaylistTrack struct {
-	AddedAt   string      `json:"added_at"`
-	AddedBy   *User       `json:"added_by"`
-	IsLocal   bool        `json:"is_local"`
-	Track     interface{} `json:"track"` // Can be Track or Episode
+	AddedAt string      `json:"added_at"`
+	AddedBy *User       `json:"added_by"`
+	IsLocal bool        `json:"is_local"`
+	Track   interface{} `json:"track"` // Can be Track or Episode
 }
 
 // AudioFeatures represents audio features for a track
@@ -114,47 +114,47 @@ type AudioAnalysisMeta struct {
 
 // AudioAnalysisTrack represents track-level audio analysis
 type AudioAnalysisTrack struct {
-	NumSamples       int     `json:"num_samples"`
-	Duration         float64 `json:"duration"`
-	SampleMd5        string  `json:"sample_md5"`
-	OffsetSeconds    int     `json:"offset_seconds"`
-	WindowSeconds    int     `json:"window_seconds"`
-	AnalysisSampleRate int   `json:"analysis_sample_rate"`
-	AnalysisChannels int     `json:"analysis_channels"`
-	EndOfFadeIn      float64 `json:"end_of_fade_in"`
-	StartOfFadeOut   float64 `json:"start_of_fade_out"`
-	Loudness         float64 `json:"loudness"`
-	Tempo            float64 `json:"tempo"`
-	TempoConfidence  float64 `json:"tempo_confidence"`
-	TimeSignature    int     `json:"time_signature"`
+	NumSamples              int     `json:"num_samples"`
+	Duration                float64 `json:"duration"`
+	SampleMd5               string  `json:"sample_md5"`
+	OffsetSeconds           int     `json:"offset_seconds"`
+	WindowSeconds           int     `json:"window_seconds"`
+	AnalysisSampleRate      int     `json:"analysis_sample_rate"`
+	AnalysisChannels        int     `json:"analysis_channels"`
+	EndOfFadeIn             float64 `json:"end_of_fade_in"`
+	StartOfFadeOut          float64 `json:"start_of_fade_out"`
+	Loudness                float64 `json:"loudness"`
+	Tempo                   float64 `json:"tempo"`
+	TempoConfidence         float64 `json:"tempo_confidence"`
+	TimeSignature           int     `json:"time_signature"`
 	TimeSignatureConfidence float64 `json:"time_signature_confidence"`
-	Key              int     `json:"key"`
-	KeyConfidence    float64 `json:"key_confidence"`
-	Mode             int     `json:"mode"`
-	ModeConfidence   float64 `json:"mode_confidence"`
-	Codestring       string  `json:"codestring"`
-	CodeVersion      float64 `json:"code_version"`
-	Echoprintstring  string  `json:"echoprintstring"`
-	EchoprintVersion float64 `json:"echoprint_version"`
-	Synchstring      string  `json:"synchstring"`
-	SynchVersion     float64 `json:"synch_version"`
-	Rhythmstring     string  `json:"rhythmstring"`
-	RhythmVersion    float64 `json:"rhythm_version"`
+	Key                     int     `json:"key"`
+	KeyConfidence           float64 `json:"key_confidence"`
+	Mode                    int     `json:"mode"`
+	ModeConfidence          float64 `json:"mode_confidence"`
+	Codestring              string  `json:"codestring"`
+	CodeVersion             float64 `json:"code_version"`
+	Echoprintstring         string  `json:"echoprintstring"`
+	EchoprintVersion        float64 `json:"echoprint_version"`
+	Synchstring             string  `json:"synchstring"`
+	SynchVersion            float64 `json:"synch_version"`
+	Rhythmstring            string  `json:"rhythmstring"`
+	RhythmVersion           float64 `json:"rhythm_version"`
 }
 
 // AudioAnalysisSection represents a section in audio analysis
 type AudioAnalysisSection struct {
-	Start           float64 `json:"start"`
-	Duration        float64 `json:"duration"`
-	Confidence      float64 `json:"confidence"`
-	Loudness        float64 `json:"loudness"`
-	Tempo           float64 `json:"tempo"`
-	TempoConfidence float64 `json:"tempo_confidence"`
-	Key             int     `json:"key"`
-	KeyConfidence   float64 `json:"key_confidence"`
-	Mode            int     `json:"mode"`
-	ModeConfidence  float64 `json:"mode_confidence"`
-	TimeSignature   int     `json:"time_signature"`
+	Start                   float64 `json:"start"`
+	Duration                float64 `json:"duration"`
+	Confidence              float64 `json:"confidence"`
+	Loudness                float64 `json:"loudness"`
+	Tempo                   float64 `json:"tempo"`
+	TempoConfidence         float64 `json:"tempo_confidence"`
+	Key                     int     `json:"key"`
+	KeyConfidence           float64 `json:"key_confidence"`
+	Mode                    int     `json:"mode"`
+	ModeConfidence          float64 `json:"mode_confidence"`
+	TimeSignature           int     `json:"time_signature"`
 	TimeSignatureConfidence float64 `json:"time_signature_confidence"`
 }
 
