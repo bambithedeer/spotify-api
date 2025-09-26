@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/bambithedeer/spotify-api/internal/errors"
@@ -25,8 +26,13 @@ type SpotifyConfig struct {
 }
 
 type LidarrConfig struct {
-	URL    string `yaml:"url"`
-	APIKey string `yaml:"api_key"`
+	URL               string `yaml:"url"`
+	APIKey            string `yaml:"api_key"`
+	RootFolderPath    string `yaml:"root_folder_path"`
+	QualityProfileID  int    `yaml:"quality_profile_id"`
+	MetadataProfileID int    `yaml:"metadata_profile_id"`
+	Monitor           bool   `yaml:"monitor"`
+	SearchForMissing  bool   `yaml:"search_for_missing"`
 }
 
 type LoggingConfig struct {
@@ -55,7 +61,12 @@ func DefaultConfig() *Config {
 			},
 		},
 		Lidarr: LidarrConfig{
-			URL: "http://localhost:8686",
+			URL:               "http://localhost:8686",
+			RootFolderPath:    "/music",
+			QualityProfileID:  1,
+			MetadataProfileID: 1,
+			Monitor:           true,
+			SearchForMissing:  true,
 		},
 		Logging: LoggingConfig{
 			Level:  "info",
@@ -163,6 +174,27 @@ func loadFromEnv(config *Config) {
 	}
 	if val := os.Getenv("LIDARR_API_KEY"); val != "" {
 		config.Lidarr.APIKey = val
+	}
+	if val := os.Getenv("LIDARR_ROOT_FOLDER_PATH"); val != "" {
+		config.Lidarr.RootFolderPath = val
+	}
+	if val := os.Getenv("LIDARR_QUALITY_PROFILE_ID"); val != "" {
+		// Convert string to int, ignore errors and use default
+		if id, err := strconv.Atoi(val); err == nil {
+			config.Lidarr.QualityProfileID = id
+		}
+	}
+	if val := os.Getenv("LIDARR_METADATA_PROFILE_ID"); val != "" {
+		// Convert string to int, ignore errors and use default
+		if id, err := strconv.Atoi(val); err == nil {
+			config.Lidarr.MetadataProfileID = id
+		}
+	}
+	if val := os.Getenv("LIDARR_MONITOR"); val != "" {
+		config.Lidarr.Monitor = strings.ToLower(val) == "true"
+	}
+	if val := os.Getenv("LIDARR_SEARCH_FOR_MISSING"); val != "" {
+		config.Lidarr.SearchForMissing = strings.ToLower(val) == "true"
 	}
 
 	// Logging configuration

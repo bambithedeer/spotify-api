@@ -40,6 +40,12 @@ type Logger struct {
 
 type Fields map[string]interface{}
 
+type Config struct {
+	Level  string `yaml:"level"`
+	Format string `yaml:"format"`
+	Output string `yaml:"output"`
+}
+
 // New creates a new logger with the specified configuration
 func New(level, format, output string) (*Logger, error) {
 	l := &Logger{
@@ -84,6 +90,16 @@ func New(level, format, output string) (*Logger, error) {
 
 	l.logger = log.New(writer, "", 0)
 	return l, nil
+}
+
+// NewLogger creates a logger from config
+func NewLogger(config *Config) *Logger {
+	logger, err := New(config.Level, config.Format, config.Output)
+	if err != nil {
+		// Fallback to default logger
+		logger, _ = New("info", "text", "stdout")
+	}
+	return logger
 }
 
 // log writes a log entry with the specified level and message
